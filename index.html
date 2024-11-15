@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera Capture</title>
+<title>Camera Capture and Save</title>
 <style>
   body {
     display: flex;
@@ -27,16 +27,21 @@
 </head>
 <body>
 
-<h2>Camera Capture</h2>
+<h2>Camera Capture and Save Image</h2>
 <video id="video" autoplay playsinline></video>
 <button id="captureButton">Capture Image</button>
-<canvas id="canvas"></canvas>
+<button id="saveButton" style="display:none;">Save Image</button>
+<button id="recaptureButton" style="display:none;">Recapture</button>
+<canvas id="canvas" style="display:none;"></canvas>
 
 <script>
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
   const captureButton = document.getElementById('captureButton');
+  const saveButton = document.getElementById('saveButton');
+  const recaptureButton = document.getElementById('recaptureButton');
   const context = canvas.getContext('2d');
+  let base64Image = '';
 
   // Request access to the camera
   async function startCamera() {
@@ -50,10 +55,48 @@
 
   // Capture image from the video stream
   captureButton.addEventListener('click', () => {
+    canvas.style.display = 'block';
+    captureButton.style.display = 'none';
+    saveButton.style.display = 'inline-block';
+    recaptureButton.style.display = 'inline-block';
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert image to Base64
+    base64Image = canvas.toDataURL('image/png');
+    console.log('Captured Image (Base64):', base64Image);
   });
+
+  // Recapture the image
+  recaptureButton.addEventListener('click', () => {
+    canvas.style.display = 'none';
+    captureButton.style.display = 'inline-block';
+    saveButton.style.display = 'none';
+    recaptureButton.style.display = 'none';
+  });
+
+  // Save the image to the device
+  saveButton.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = base64Image;  // The Base64 image URL
+    link.download = 'captured_image.png';  // Name the file when saved
+    link.click();  // Trigger the download
+
+    // Reset the UI after saving
+    resetCamera();
+  });
+
+  // Reset the camera and UI
+  function resetCamera() {
+    canvas.style.display = 'none';
+    captureButton.style.display = 'inline-block';
+    saveButton.style.display = 'none';
+    recaptureButton.style.display = 'none';
+    base64Image = '';
+    startCamera();
+  }
 
   // Start the camera when the page loads
   window.addEventListener('load', startCamera);
