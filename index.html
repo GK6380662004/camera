@@ -80,7 +80,7 @@
       link.download = 'captured_image.png';  // Name the file when saved
       link.click();  // Trigger the download
     }, 'image/png');
-
+localStorage.setItem("image",canvas)
     // Reset the UI after saving
     resetCamera();
   });
