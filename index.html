@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera Capture and Save Image</title>
+<title>Camera Capture and Save</title>
 <style>
   body {
     display: flex;
@@ -41,6 +41,7 @@
   const saveButton = document.getElementById('saveButton');
   const recaptureButton = document.getElementById('recaptureButton');
   const context = canvas.getContext('2d');
+  let base64Image = '';
 
   // Request access to the camera
   async function startCamera() {
@@ -62,6 +63,11 @@
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert image to Base64
+    base64Image = canvas.toDataURL('image/png');
+    localStorage.setItem("image",base64Image);
+    console.log('Captured Image (Base64):', base64Image);
   });
 
   // Recapture the image
@@ -72,15 +78,13 @@
     recaptureButton.style.display = 'none';
   });
 
-  // Save the image as a file (not Base64)
+  // Save the image to the device
   saveButton.addEventListener('click', () => {
-    canvas.toBlob(function(blob) {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob); // Create a blob URL for the image
-      link.download = 'captured_image.png';  // Name the file when saved
-      link.click();  // Trigger the download
-    }, 'image/png');
-localStorage.setItem("image",canvas)
+    const link = document.createElement('a');
+    link.href = base64Image;  // The Base64 image URL
+    link.download = 'captured_image.png';  // Name the file when saved
+    link.click();  // Trigger the download
+
     // Reset the UI after saving
     resetCamera();
   });
@@ -91,6 +95,7 @@ localStorage.setItem("image",canvas)
     captureButton.style.display = 'inline-block';
     saveButton.style.display = 'none';
     recaptureButton.style.display = 'none';
+    base64Image = '';
     startCamera();
   }
 
